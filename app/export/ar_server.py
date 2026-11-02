@@ -2,7 +2,8 @@
 Augmented Reality (AR) Web Server & 3D GLB/glTF Exporter for Electrical Enclosures.
 Enables instant 1:1 physical scale AR viewing on mobile devices (Android & iOS).
 - Exports CAD layout (mm) to glTF/GLB with 0.001 scale conversion (meters for real-world AR).
-- Serves interactive WebAR page powered by Google @model-viewer and Google Scene Viewer / Quick Look.
+- Serves interactive WebAR page powered by Google @model-viewer with on-screen visual guidance (Amazon-style).
+- Includes built-in Live Camera AR overlay mode and in-browser WebXR (no crashing external Scene Viewer app).
 - Generates dynamic LAN IP link and QR code for one-click mobile camera scanning.
 """
 import io
@@ -27,7 +28,6 @@ def get_local_ip() -> str:
     """Detect the local LAN/Wi-Fi IPv4 address of this machine."""
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
-        # Connecting to public or broadcast IP selects the active outgoing network interface
         s.connect(('10.255.255.255', 1))
         ip = s.getsockname()[0]
     except Exception:
@@ -73,7 +73,6 @@ def gltf_to_glb(gltf_dict: Dict[str, Any]) -> bytes:
         else:
             raw_bytes = b''
 
-        # Align each buffer to 4-byte boundary
         while len(combined_bin) % 4 != 0:
             combined_bin.append(0)
 
@@ -81,7 +80,6 @@ def gltf_to_glb(gltf_dict: Dict[str, Any]) -> bytes:
         buffer_offsets.append(offset)
         combined_bin.extend(raw_bytes)
 
-    # Remap bufferViews to the unified binary chunk
     for bv in gltf_dict.get('bufferViews', []):
         old_buf_idx = bv.get('buffer', 0)
         old_offset = bv.get('byteOffset', 0)
@@ -89,21 +87,17 @@ def gltf_to_glb(gltf_dict: Dict[str, Any]) -> bytes:
         base_offset = buffer_offsets[old_buf_idx] if old_buf_idx < len(buffer_offsets) else 0
         bv['byteOffset'] = base_offset + old_offset
 
-    # Single unified binary buffer for the GLB BIN chunk
     gltf_dict['buffers'] = [{'byteLength': len(combined_bin)}]
 
-    # JSON Chunk (UTF-8, 4-byte space padded)
     json_bytes = json.dumps(gltf_dict, separators=(',', ':')).encode('utf-8')
     while len(json_bytes) % 4 != 0:
         json_bytes += b' '
 
-    # Align binary chunk to 4 bytes
     while len(combined_bin) % 4 != 0:
         combined_bin.append(0)
 
     total_len = 12 + (8 + len(json_bytes)) + (8 + len(combined_bin))
 
-    # Header: Magic b'glTF' (0x46546C67), Version 2, Total Length
     header = struct.pack('<4sII', b'glTF', 2, total_len)
     json_chunk = struct.pack('<I4s', len(json_bytes), b'JSON') + json_bytes
     bin_chunk = struct.pack('<I4s', len(combined_bin), b'BIN\x00') + bytes(combined_bin)
@@ -146,15 +140,10 @@ def generate_panel_glb(
     pl.add_mesh(plate_mesh, color="#94A3B8")
 
     # 2. Enclosure Outer Cabinet Walls (Sheet metal body)
-    # Left wall
     pl.add_mesh(pv.Box(bounds=(x_min, x_min + wall_t, y_min, y_max, z_min, z_max)), color="#475569")
-    # Right wall
     pl.add_mesh(pv.Box(bounds=(x_max - wall_t, x_max, y_min, y_max, z_min, z_max)), color="#475569")
-    # Top roof
     pl.add_mesh(pv.Box(bounds=(x_min, x_max, y_max - wall_t, y_max, z_min, z_max)), color="#475569")
-    # Bottom floor / gland plate
     pl.add_mesh(pv.Box(bounds=(x_min, x_max, y_min, y_min + wall_t, z_min, z_max)), color="#475569")
-    # Back wall behind mounting plate
     pl.add_mesh(pv.Box(bounds=(x_min, x_max, y_min, y_max, z_min, z_min + wall_t)), color="#334155")
 
     # 3. Outer Door Sheet (Z+1 Surface)
@@ -234,7 +223,6 @@ def generate_panel_glb(
         pl.add_mesh(comp_mesh, color=color, opacity=0.98)
         placed_count += 1
 
-    # Export glTF to temporary file
     temp_fd, temp_path = tempfile.mkstemp(suffix=".gltf")
     os.close(temp_fd)
 
@@ -249,7 +237,6 @@ def generate_panel_glb(
             except Exception:
                 pass
 
-    # Ensure transparent materials have alphaMode = BLEND and doubleSided = True
     for mat in gltf_dict.get("materials", []):
         pbr = mat.get("pbrMetallicRoughness", {})
         color_factor = pbr.get("baseColorFactor", [1, 1, 1, 1])
@@ -257,9 +244,6 @@ def generate_panel_glb(
             mat["alphaMode"] = "BLEND"
             mat["doubleSided"] = True
 
-    # Real-World AR 1:1 Scale & Floor-Level Alignment
-    # Scale: 0.001 (1 mm = 0.001 m)
-    # Origin: Centered horizontally (X), grounded on floor (Y starting at 0), centered depth (Z)
     x_center = (x_min + x_max) / 2.0
     y_floor = y_min
     z_center = (z_min + z_max) / 2.0
@@ -308,25 +292,16 @@ def generate_qr_png_bytes(url: str) -> bytes:
 
 
 def get_webar_html(metadata: Dict[str, Any], url: str) -> str:
-    """Construct high-performance, mobile-responsive WebAR HTML interface."""
+    """Construct high-performance, mobile-responsive WebAR HTML interface with Amazon-style on-screen guiding."""
     w = int(metadata.get("width_mm", 800))
     h = int(metadata.get("height_mm", 1200))
     d = int(metadata.get("depth_mm", 400))
     ip = metadata.get("ip_rating", "IP54")
     count = metadata.get("component_count", 0)
 
-    # Convert to meters string for real AR display
     w_m = f"{w / 1000.0:.2f} m"
     h_m = f"{h / 1000.0:.2f} m"
     d_m = f"{d / 1000.0:.2f} m"
-
-    glb_url = f"{url}/model.glb"
-    scene_viewer_intent = (
-        f"intent://arvr.google.com/scene-viewer/1.0?"
-        f"file={glb_url}&mode=ar_preferred&title=Electrical+Panel+{w}x{h}x{d}mm&resizable=false"
-        f"#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;"
-        f"S.browser_fallback_url={url};end;"
-    )
 
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -334,7 +309,7 @@ def get_webar_html(metadata: Dict[str, Any], url: str) -> str:
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AR Panel Inspection - ElectricalPanelDesigner</title>
-    <!-- Google @model-viewer for WebXR, Android Scene Viewer & iOS Quick Look -->
+    <!-- Google @model-viewer: Strict WebXR and Quick Look (Scene Viewer removed to prevent app crashes) -->
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
     <style>
         * {{ margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }}
@@ -345,21 +320,20 @@ def get_webar_html(metadata: Dict[str, Any], url: str) -> str:
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            position: relative;
         }}
         header {{
             background: #1A2730;
-            padding: 12px 18px;
+            padding: 10px 16px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             border-bottom: 1.5px solid #2A3945;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
-            z-index: 10;
+            z-index: 20;
         }}
         .brand {{
             font-size: 15px;
             font-weight: 800;
-            letter-spacing: 0.4px;
             color: #FFFFFF;
             display: flex;
             align-items: center;
@@ -372,7 +346,6 @@ def get_webar_html(metadata: Dict[str, Any], url: str) -> str:
             font-weight: 800;
             padding: 3px 8px;
             border-radius: 4px;
-            text-transform: uppercase;
         }}
         .viewer-container {{
             flex: 1;
@@ -381,92 +354,211 @@ def get_webar_html(metadata: Dict[str, Any], url: str) -> str:
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
+        }}
+        #camera-video {{
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+            z-index: 1;
         }}
         model-viewer {{
             width: 100%;
             height: 100%;
             outline: none;
+            position: relative;
+            z-index: 2;
         }}
-        #ar-button {{
+
+        /* On-Screen Amazon-Style AR HUD Overlay */
+        .ar-overlay-hud {{
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 30;
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 16px;
+        }}
+        .hud-card {{
+            background: rgba(17, 28, 36, 0.90);
+            backdrop-filter: blur(10px);
+            border: 1.5px solid #38BDF8;
+            border-radius: 16px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            max-width: 90%;
+            animation: fadeInDown 0.3s ease;
+        }}
+        @keyframes fadeInDown {{
+            from {{ opacity: 0; transform: translateY(-15px); }}
+            to {{ opacity: 1; transform: translateY(0); }}
+        }}
+        .phone-scanner {{
+            width: 32px;
+            height: 32px;
+            animation: wavePhone 2s infinite ease-in-out;
+        }}
+        @keyframes wavePhone {{
+            0%, 100% {{ transform: rotate(-15deg) translateX(-6px); }}
+            50% {{ transform: rotate(15deg) translateX(6px); }}
+        }}
+        .hud-title {{
+            font-size: 14px;
+            font-weight: 800;
+            color: #38BDF8;
+        }}
+        .hud-sub {{
+            font-size: 11px;
+            color: #CBD5E1;
+            margin-top: 2px;
+        }}
+
+        /* Reticle Guide in Center of Camera */
+        .reticle-container {{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            animation: pulseReticle 2s infinite ease-in-out;
+        }}
+        @keyframes pulseReticle {{
+            0%, 100% {{ transform: scale(0.95); opacity: 0.8; }}
+            50% {{ transform: scale(1.08); opacity: 1; }}
+        }}
+        .reticle-ring {{
+            width: 80px;
+            height: 80px;
+            border: 3px dashed #FF9A4E;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 154, 78, 0.15);
+        }}
+        .reticle-text {{
+            background: rgba(17, 28, 36, 0.85);
+            color: #FF9A4E;
+            font-size: 12px;
+            font-weight: 800;
+            padding: 4px 12px;
+            border-radius: 20px;
+            border: 1px solid #FF9A4E;
+        }}
+
+        /* Placed Notification */
+        .placed-hud {{
+            background: rgba(22, 101, 52, 0.92);
+            border: 1.5px solid #4ADE80;
+            border-radius: 14px;
+            padding: 10px 18px;
+            color: #FFFFFF;
+            font-size: 13px;
+            font-weight: 700;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }}
+
+        /* Action Buttons Area */
+        .action-dock {{
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            z-index: 25;
+            padding: 0 16px;
+        }}
+        .btn-primary-ar {{
             background: #FF9A4E;
             color: #111C24;
             border: none;
-            border-radius: 28px;
-            padding: 14px 28px;
+            border-radius: 30px;
+            padding: 14px 26px;
             font-size: 15px;
             font-weight: 800;
-            position: absolute;
-            bottom: 24px;
-            left: 50%;
-            transform: translateX(-50%);
-            box-shadow: 0 4px 20px rgba(255, 154, 78, 0.45);
             display: flex;
             align-items: center;
             gap: 10px;
             cursor: pointer;
-            z-index: 20;
-            white-space: nowrap;
-            transition: transform 0.15s, background-color 0.15s;
+            box-shadow: 0 4px 20px rgba(255, 154, 78, 0.5);
+            transition: transform 0.1s;
         }}
-        #ar-button:active {{
-            background: #F08738;
-            transform: translateX(-50%) scale(0.97);
+        .btn-primary-ar:active {{
+            transform: scale(0.96);
         }}
-        .ar-icon {{
-            width: 22px;
-            height: 22px;
-            fill: none;
-            stroke: #111C24;
-            stroke-width: 2.3;
+        .btn-camera-live {{
+            background: #0284C7;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(2, 132, 199, 0.4);
+        }}
+
+        /* Instructions Drawer */
+        .guide-steps {{
+            background: rgba(26, 39, 48, 0.95);
+            border: 1px solid #2A3945;
+            border-radius: 12px;
+            padding: 10px 14px;
+            display: flex;
+            gap: 12px;
+            font-size: 11px;
+            color: #CBD5E1;
+            max-width: 440px;
+            width: 100%;
+            justify-content: space-around;
+        }}
+        .step-item {{
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }}
+        .step-num {{
+            background: #FF9A4E;
+            color: #111C24;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 10px;
         }}
         .info-panel {{
             background: #1A2730;
             border-top: 1.5px solid #2A3945;
-            padding: 12px 18px;
+            padding: 10px 16px;
             font-size: 12px;
             color: #8A8C8D;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            z-index: 10;
+            z-index: 20;
         }}
         .info-pill {{
             color: #E2E8F0;
             font-weight: 700;
-            font-size: 13px;
-        }}
-        .sub-bar {{
-            background: #141E26;
-            padding: 8px 18px;
-            font-size: 11px;
-            color: #64748B;
-            text-align: center;
-            display: flex;
-            justify-content: center;
-            gap: 16px;
-        }}
-        .sub-bar a {{
-            color: #38BDF8;
-            text-decoration: none;
-            font-weight: 600;
-        }}
-        .scale-alert {{
-            position: absolute;
-            top: 14px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(17, 28, 36, 0.85);
-            backdrop-filter: blur(6px);
-            border: 1px solid #38BDF8;
-            color: #E2E8F0;
-            font-size: 11px;
-            padding: 6px 14px;
-            border-radius: 20px;
-            pointer-events: none;
-            z-index: 15;
-            display: flex;
-            align-items: center;
-            gap: 6px;
         }}
     </style>
 </head>
@@ -476,21 +568,20 @@ def get_webar_html(metadata: Dict[str, Any], url: str) -> str:
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF9A4E" stroke-width="2.5"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
             Electrical Panel AR
         </div>
-        <div class="badge">1:1 Actual Scale</div>
+        <div class="badge">1:1 Scale</div>
     </header>
 
     <div class="viewer-container">
-        <div class="scale-alert">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-            Actual 1:1 Scale ({w_m} × {h_m} × {d_m})
-        </div>
+        <!-- Live Camera Stream Background (For Live Camera Mode) -->
+        <video id="camera-video" autoplay playsinline muted></video>
 
+        <!-- 3D Model Viewer with Strict WebXR (Scene Viewer omitted to prevent crashes) -->
         <model-viewer
             id="panel-viewer"
             src="/model.glb"
             alt="Electrical Panel 3D Model"
             ar
-            ar-modes="webxr scene-viewer quick-look"
+            ar-modes="webxr quick-look"
             ar-scale="fixed"
             camera-controls
             touch-action="pan-y"
@@ -501,44 +592,133 @@ def get_webar_html(metadata: Dict[str, Any], url: str) -> str:
             shadow-softness="0.7"
             exposure="1.0">
 
-            <button slot="ar-button" id="ar-button">
-                <svg class="ar-icon" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+            <!-- Slot AR Button used by WebXR -->
+            <button slot="ar-button" id="webxr-ar-btn" style="display: none;"></button>
+        </model-viewer>
+
+        <!-- On-Screen Amazon-Style AR Guidance HUD -->
+        <div id="ar-hud" class="ar-overlay-hud">
+            <!-- Step 1: Scanning Prompt -->
+            <div id="hud-scanning" class="hud-card">
+                <svg class="phone-scanner" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" stroke-width="2.2"><rect x="5" y="2" width="14" height="20" rx="3"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+                <div>
+                    <div class="hud-title">Scanning Floor / Surface</div>
+                    <div class="hud-sub">Move phone slowly in a circle pointing at floor</div>
+                </div>
+            </div>
+
+            <!-- Center Target Reticle -->
+            <div id="hud-reticle" class="reticle-container">
+                <div class="reticle-ring">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FF9A4E" stroke-width="2.2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+                </div>
+                <div class="reticle-text">Tap anywhere to place 1:1 Panel</div>
+            </div>
+
+            <!-- Placed Confirmation -->
+            <div id="hud-placed" class="placed-hud">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>Panel Anchored! Walk around to inspect</span>
+            </div>
+        </div>
+
+        <!-- Floating Action Dock -->
+        <div id="action-dock" class="action-dock">
+            <!-- 3-Step Visual Guide -->
+            <div class="guide-steps">
+                <div class="step-item"><span class="step-num">1</span> Aim Floor</div>
+                <div class="step-item"><span class="step-num">2</span> Move Phone</div>
+                <div class="step-item"><span class="step-num">3</span> Tap Screen</div>
+            </div>
+
+            <button id="main-ar-trigger" class="btn-primary-ar" onclick="launchAR()">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111C24" stroke-width="2.4"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
                 View in AR (Actual Size)
             </button>
-        </model-viewer>
-    </div>
 
-    <div id="android-tip" style="background: #1e293b; border-top: 1px solid #334155; padding: 8px 14px; font-size: 11px; color: #94a3b8; display: flex; align-items: center; justify-content: space-between;">
-        <span>📱 <b>Android Tip:</b> If Scene Viewer closes, enable Chrome WebXR flag for direct camera AR.</span>
-        <button onclick="document.getElementById('help-modal').style.display='flex'" style="background: #0284c7; color: white; border: none; border-radius: 4px; padding: 3px 8px; font-size: 10px; font-weight: 700; cursor: pointer;">How-To</button>
-    </div>
-
-    <div id="help-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; padding: 20px; align-items: center; justify-content: center;" onclick="if(event.target===this)this.style.display='none'">
-        <div style="background: #1e293b; border: 1.5px solid #0284c7; border-radius: 12px; padding: 18px; max-width: 360px; color: #f1f5f9; font-size: 12px; line-height: 1.5;">
-            <div style="font-size: 14px; font-weight: 800; color: #38bdf8; margin-bottom: 8px;">Why does the Google AR app close?</div>
-            <p style="margin-bottom: 10px; color: #cbd5e1;">Android's native Google Scene Viewer blocks downloading 3D files over local Wi-Fi HTTP (<code style="color: #f59e0b;">http://192.168.x.x</code>) due to system security rules.</p>
-            <div style="font-weight: 700; color: #38bdf8; margin-bottom: 4px;">Quick 30-Sec Fix for Camera AR:</div>
-            <ol style="margin-left: 18px; margin-bottom: 12px; color: #e2e8f0;">
-                <li>Open a new Chrome tab and go to: <br><b style="color: #facc15;">chrome://flags</b></li>
-                <li>Search for: <b style="color: #facc15;">unsafely-treat-insecure-origin-as-secure</b></li>
-                <li>Set to <b>Enabled</b> and enter this URL: <br><code style="color: #38bdf8;">{url}</code></li>
-                <li>Tap <b>Relaunch</b> at the bottom.</li>
-            </ol>
-            <p style="color: #94a3b8; font-size: 11px; margin-bottom: 14px;">Once enabled, Chrome's in-browser camera AR (WebXR) will open your camera and place the panel without needing Scene Viewer!</p>
-            <button onclick="document.getElementById('help-modal').style.display='none'" style="width: 100%; background: #0284c7; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: 700; font-size: 12px; cursor: pointer;">Got it!</button>
+            <!-- Instant Live Camera Pass-Through Mode (Guaranteed fallback) -->
+            <button id="btn-camera-toggle" class="btn-camera-live" onclick="toggleCameraOverlay()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                <span id="cam-btn-text">📷 Turn On Room Camera View</span>
+            </button>
         </div>
     </div>
 
     <div class="info-panel">
         <div>Size: <span class="info-pill">{w} × {h} × {d} mm</span> ({ip})</div>
-        <div>Components: <span class="info-pill">{count} Placed</span></div>
+        <div>Scale: <span class="info-pill">{w_m} × {h_m} × {d_m}</span></div>
     </div>
 
-    <div class="sub-bar">
-        <span>Point camera at floor or wall to anchor</span>
-        <a href="{scene_viewer_intent}">Direct Android AR</a>
-        <a href="/model.glb" download>Download .GLB</a>
-    </div>
+    <script>
+        const viewer = document.getElementById('panel-viewer');
+        const hud = document.getElementById('ar-hud');
+        const hudScanning = document.getElementById('hud-scanning');
+        const hudReticle = document.getElementById('hud-reticle');
+        const hudPlaced = document.getElementById('hud-placed');
+        const actionDock = document.getElementById('action-dock');
+        const video = document.getElementById('camera-video');
+        let cameraActive = false;
+        let camStream = null;
+
+        // WebXR Status Listener
+        viewer.addEventListener('ar-status', (event) => {{
+            const status = event.detail.status;
+            if (status === 'session-started') {{
+                hud.style.display = 'flex';
+                hudScanning.style.display = 'flex';
+                hudReticle.style.display = 'flex';
+                hudPlaced.style.display = 'none';
+                actionDock.style.display = 'none';
+            }} else if (status === 'object-placed') {{
+                hudScanning.style.display = 'none';
+                hudReticle.style.display = 'none';
+                hudPlaced.style.display = 'flex';
+                setTimeout(() => {{ hudPlaced.style.display = 'none'; }}, 4000);
+            }} else if (status === 'not-presenting') {{
+                hud.style.display = 'none';
+                actionDock.style.display = 'flex';
+            }} else if (status === 'failed') {{
+                hud.style.display = 'none';
+                actionDock.style.display = 'flex';
+                toggleCameraOverlay(); // Automatic graceful fallback to Camera View!
+            }}
+        }});
+
+        function launchAR() {{
+            if (viewer.canActivateAR) {{
+                viewer.activateAR();
+            }} else {{
+                toggleCameraOverlay();
+            }}
+        }}
+
+        async function toggleCameraOverlay() {{
+            if (!cameraActive) {{
+                try {{
+                    camStream = await navigator.mediaDevices.getUserMedia({{
+                        video: {{ facingMode: {{ ideal: 'environment' }} }}
+                    }});
+                    video.srcObject = camStream;
+                    video.style.display = 'block';
+                    viewer.style.background = 'transparent';
+                    cameraActive = true;
+                    document.getElementById('cam-btn-text').innerText = '✕ Turn Off Room Camera View';
+                    document.getElementById('main-ar-trigger').style.display = 'none';
+                }} catch (err) {{
+                    alert('Camera access needed to show panel in your room. Please allow camera permissions in browser settings.');
+                }}
+            }} else {{
+                if (camStream) {{
+                    camStream.getTracks().forEach(t => t.stop());
+                }}
+                video.style.display = 'none';
+                viewer.style.background = '';
+                cameraActive = false;
+                document.getElementById('cam-btn-text').innerText = '📷 Turn On Room Camera View';
+                document.getElementById('main-ar-trigger').style.display = 'flex';
+            }}
+        }}
+    </script>
 </body>
 </html>"""
 
@@ -547,7 +727,6 @@ class ARRequestHandler(http.server.BaseHTTPRequestHandler):
     """Handles HTTP requests for WebAR HTML, GLB model, QR image, and status."""
 
     def log_message(self, format, *args):
-        # Quiet logger to avoid terminal clutter
         pass
 
     def do_GET(self):
@@ -657,7 +836,6 @@ class ARServer:
         self.is_running = False
 
 
-# Module-level singleton
 _ar_server_instance: Optional[ARServer] = None
 
 
