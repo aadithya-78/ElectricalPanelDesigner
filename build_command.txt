@@ -1,0 +1,34 @@
+================================================================================
+ELECTRICAL PANEL DESIGNER - BUILD STEPS & COMMAND
+================================================================================
+
+1. PREREQUISITES
+--------------------------------------------------------------------------------
+Ensure your Python environment is active and required packages are installed:
+
+pip install -r requirements.txt
+pip install pyinstaller
+
+2. ONE-FILE STANDALONE BUILD COMMAND (NO _internal FOLDER NEEDED)
+--------------------------------------------------------------------------------
+pyinstaller --noconfirm --onefile --windowed --name "ElectricalPanelDesigner" --icon "app/resources/icons/epd_logo.ico" --add-data "catalogs;catalogs" --add-data "app/resources;app/resources" --add-data "app/database/component_library.db;app/database" main.py
+
+3. OUTPUT LOCATION
+--------------------------------------------------------------------------------
+The standalone single executable is built at:
+dist/ElectricalPanelDesigner.exe
+
+4. DELIVERABLE DEPLOYMENT
+--------------------------------------------------------------------------------
+Copy dist/ElectricalPanelDesigner.exe into Deliverables/:
+- Deliverables/ElectricalPanelDesigner.exe (Single standalone executable, ~219 MB)
+- Deliverables/catalogs/ (Excel component catalogs)
+- Deliverables/data/ (Pre-populated SQLite database)
+- Deliverables/sample_project.epd (Sample project file)
+
+5. RUNNING THE EXECUTABLE
+--------------------------------------------------------------------------------
+Simply double-click:
+.\Deliverables\ElectricalPanelDesigner.exe
+No _internal folder, Python installation, or command line required!
+================================================================================

@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Electrical Panel Engineering Report - 18 kW ATV630 Drive Panel</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 30px;
+            color: #263238;
+            background-color: #fdfdfd;
+            line-height: 1.5;
+        }
+        h1 {
+            color: #0d47a1;
+            border-bottom: 2px solid #1976d2;
+            padding-bottom: 8px;
+            font-size: 24px;
+        }
+        h2 {
+            color: #1565c0;
+            margin-top: 25px;
+            border-bottom: 1px solid #cfd8dc;
+            padding-bottom: 5px;
+            font-size: 18px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 13px;
+        }
+        th, td {
+            border: 1px solid #cfd8dc;
+            padding: 8px 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #eceff1;
+            color: #37474f;
+            font-weight: 600;
+        }
+        tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .card {
+            background: #ffffff;
+            border: 1px solid #cfd8dc;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .unverified {
+            color: #c62828;
+            font-weight: 600;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .badge-power { background: #ffcdd2; color: #b71c1c; }
+        .badge-control { background: #bbdefb; color: #0d47a1; }
+        .badge-acc { background: #c8e6c9; color: #1b5e20; }
+        .badge-wire { background: #ffe0b2; color: #e65100; }
+        .footer {
+            margin-top: 40px;
+            border-top: 1px solid #cfd8dc;
+            padding-top: 10px;
+            font-size: 11px;
+            color: #78909c;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>AI ELECTRICAL PANEL DESIGNER — ENGINEERING REPORT</h1>
+    
+    <div class="card">
+        <div class="grid-2">
+            <div>
+                <strong>Project:</strong> 18 kW ATV630 Drive Panel<br>
+                <strong>Date:</strong> 2026-10-30 15:07:55<br>
+                <strong>Input Requirement:</strong> "Create an 18 kW motor drive panel using Schneider ATV630."<br>
+                <strong>Panel Application:</strong> Industrial Variable Speed Drive (VFD) Control Panel (18.5 kW)<br>
+                <strong>Motor Rating:</strong> 18.5 kW (User specified 18 kW; standard industrial IEC motor/drive size is 18.5 kW (25 HP, approx 38A FLA at 415V).)
+            </div>
+            <div>
+                <strong>Supply:</strong> 415V AC, 3-Phase, 50Hz<br>
+                <strong>Drive Type:</strong> Schneider ATV630<br>
+                <strong>Enclosure Size:</strong> 1200 x 1800 x 550 mm (IP54)<br>
+                <strong>Mounting Plate:</strong> 1140 x 1660 mm<br>
+                <strong>Total Heat Loss:</strong> 622.4 W (Cooling: Filter Fan)
+            </div>
+        </div>
+    </div>
+
+    <h2>1. Provisional Engineering Assumptions</h2>
+    <ul>
+        <li>Provisional Assumption: 415V 3-Phase 50Hz standard Indian/European industrial supply.</li><li>Provisional Assumption: Standard IEC 18.5 kW class motor sizing.</li><li>Provisional Assumption: Enclosure rated IP54 indoor wall/floor mount with cooling fan and filter.</li><li>Provisional Assumption: Bottom cable entry for supply feeder and motor cabling.</li><li>Provisional Assumption: 24V DC control circuit powered by dedicated regulated SMPS.</li>
+    </ul>
+
+    <h2>2. Manufacturer Selections</h2>
+    <table>
+        <thead>
+            <tr><th>Equipment Category</th><th>Selected Manufacturer</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>VFD</td><td>Schneider Electric</td></tr><tr><td>MCCB</td><td>Schneider Electric</td></tr><tr><td>Enclosure</td><td>Rittal</td></tr><tr><td>Terminal Blocks</td><td>Connectwell</td></tr><tr><td>SMPS</td><td>Mean Well</td></tr>
+        </tbody>
+    </table>
+
+    <h2>3. Approved Bill of Materials (BOM)</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Category</th>
+                <th>Component</th>
+                <th>Manufacturer</th>
+                <th>Part Number</th>
+                <th>Qty</th>
+                <th>Dimensions X×Y×Z (mm)</th>
+                <th>Mounting</th>
+                <th>Heat (W)</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            <tr>
+                <td>1</td>
+                <td><span class="badge badge-power">Power</span></td>
+                <td><strong>Variable Frequency Drive 18.5 kW</strong><br><small>Altivar Process ATV630 18.5 kW / 25 HP, 3-Ph 380-480V, 39.2A normal duty, IP21</small></td>
+                <td>Schneider Electric</td>
+                <td>ATV630D18N4</td>
+                <td>1</td>
+                <td>211.0 × 546.0 × 232.0</td>
+                <td>Plate</td>
+                <td>455.0</td>
+            </tr>
+
+            <tr>
+                <td>2</td>
+                <td><span class="badge badge-power">Power</span></td>
+                <td><strong>Molded Case Circuit Breaker (MCCB) 63A 3P</strong><br><small>Compact NSX100F TMD 63A 3P 36kA thermal-magnetic trip unit</small></td>
+                <td>Schneider Electric</td>
+                <td>LV429630</td>
+                <td>1</td>
+                <td>105.0 × 161.0 × 86.0</td>
+                <td>Plate</td>
+                <td>18.0</td>
+            </tr>
+
+            <tr>
+                <td>3</td>
+                <td><span class="badge badge-power">Power</span></td>
+                <td><strong>MCCB Extended Rotary Operating Handle</strong><br><small>Door interlocked rotary handle mechanism with shaft and padlocking</small></td>
+                <td>Schneider Electric</td>
+                <td>LV429338</td>
+                <td>1</td>
+                <td>75.0 × 75.0 × 50.0</td>
+                <td>Door</td>
+                <td>0.0</td>
+            </tr>
+
+            <tr>
+                <td>4</td>
+                <td><span class="badge badge-power">Power</span></td>
+                <td><strong>Input AC Line Reactor 3%</strong><br><small>3-Phase 3% line choke 45A for line surge absorption & harmonic suppression</small></td>
+                <td>Schneider Electric</td>
+                <td>VW3A4554</td>
+                <td>1</td>
+                <td>180.0 × 210.0 × 140.0</td>
+                <td>Plate</td>
+                <td>95.0</td>
+            </tr>
+
+            <tr>
+                <td>5</td>
+                <td><span class="badge badge-power">Power</span></td>
+                <td><strong>Main Power Input Terminal Block 35 sq mm (Set of 3)</strong><br><small>Feed-through high-current DIN terminal blocks for R-S-T mains incoming</small></td>
+                <td>Connectwell</td>
+                <td>CTS35U</td>
+                <td>3</td>
+                <td>16.0 × 58.0 × 54.0</td>
+                <td>DIN Rail</td>
+                <td>2.5</td>
+            </tr>
+
+            <tr>
+                <td>6</td>
+                <td><span class="badge badge-power">Power</span></td>
+                <td><strong>Motor Output Terminal Block 35 sq mm (Set of 3)</strong><br><small>Feed-through high-current DIN terminal blocks for U-V-W motor outgoing</small></td>
+                <td>Connectwell</td>
+                <td>CTS35U</td>
+                <td>3</td>
+                <td>16.0 × 58.0 × 54.0</td>
+                <td>DIN Rail</td>
+                <td>2.5</td>
+            </tr>
+
+            <tr>
+                <td>7</td>
+                <td><span class="badge badge-power">Power</span></td>
+                <td><strong>Earth (PE) Copper Busbar Bar 25x5mm</strong><br><small>High conductivity electrolytic copper earth busbar with M6 tapped studs</small></td>
+                <td>Generic</td>
+                <td>PART NUMBER NOT VERIFIED</td>
+                <td>1</td>
+                <td>300.0 × 25.0 × 20.0</td>
+                <td>Plate</td>
+                <td>0.0</td>
+            </tr>
+
+            <tr>
+                <td>8</td>
+                <td><span class="badge badge-control">Control</span></td>
+                <td><strong>Regulated Switch Mode Power Supply 24V DC 2.5A</strong><br><small>Ultra slim 60W 24V DC 2.5A DIN rail power supply 85-264V AC input</small></td>
+                <td>Mean Well</td>
+                <td>HDR-60-24</td>
+                <td>1</td>
+                <td>52.0 × 90.0 × 55.0</td>
+                <td>DIN Rail</td>
+                <td>9.0</td>
+            </tr>
+
+            <tr>
+                <td>9</td>
+                <td><span class="badge badge-control">Control</span></td>
+                <td><strong>Control Circuit MCB 2-Pole 6A C-Curve</strong><br><small>Acti9 iC60N 2P 6A 10kA miniature circuit breaker for SMPS AC supply</small></td>
+                <td>Schneider Electric</td>
+                <td>A9F74206</td>
+                <td>1</td>
+                <td>36.0 × 85.0 × 78.0</td>
+                <td>DIN Rail</td>
+                <td>2.2</td>
+            </tr>
+
+            <tr>
+                <td>10</td>
+                <td><span class="badge badge-control">Control</span></td>
+                <td><strong>DC Branch Circuit MCB 1-Pole 4A B-Curve</strong><br><small>Acti9 iC60N 1P 4A miniature circuit breaker for 24V DC field wiring</small></td>
+                <td>Schneider Electric</td>
+                <td>A9F73104</td>
+                <td>1</td>
+                <td>18.0 × 85.0 × 78.0</td>
+                <td>DIN Rail</td>
+                <td>1.5</td>
+            </tr>
+
+            <tr>
+                <td>11</td>
+                <td><span class="badge badge-control">Control</span></td>
+                <td><strong>Slim Interface Relay 24V DC 1CO with LED Base</strong><br><small>Plug-in interface relay 24V DC coil with socket, LED and surge suppression</small></td>
+                <td>Schneider Electric</td>
+                <td>RXG12BD</td>
+                <td>3</td>
+                <td>16.0 × 75.0 × 62.0</td>
+                <td>DIN Rail</td>
+                <td>0.8</td>
+            </tr>
+
+            <tr>
+                <td>12</td>
+                <td><span class="badge badge-control">Control</span></td>
+                <td><strong>Emergency Stop Push Button (Mushroom Head 40mm)</strong><br><small>Harmony XB4 22mm trigger action red mushroom e-stop twist-to-release 2NC</small></td>
+                <td>Schneider Electric</td>
+                <td>XB4BT845</td>
+                <td>1</td>
+                <td>40.0 × 40.0 × 70.0</td>
+                <td>Door</td>
+                <td>0.0</td>
+            </tr>
+
+            <tr>
+                <td>13</td>
+                <td><span class="badge badge-control">Control</span></td>
+                <td><strong>Local-Off-Remote 3-Position Selector Switch</strong><br><small>Harmony XB4 22mm stay-put 3-position selector switch with 2NO contacts</small></td>
+                <td>Schneider Electric</td>
+                <td>XB4BD33</td>
+                <td>1</td>
+                <td>30.0 × 30.0 × 65.0</td>
+                <td>Door</td>
+                <td>0.0</td>
+            </tr>
+
+            <tr>
+                <td>14</td>
+                <td><span class="badge badge-control">Control</span></td>
+                <td><strong>Start Push Button (Green Flush)</strong><br><small>Harmony XB4 22mm spring-return flush green button 1NO</small></td>
+                <td>Schneider Electric</td>
+                <td>XB4BA31</td>
+                <td>1</td>
+                <td>30.0 × 30.0 × 65.0</td>
+                <td>Door</td>
+                <td>0.0</td>
+            </tr>
+
+            <tr>
+                <td>15</td>
+                <td><span class="badge badge-control">Control</span></td>
+                <td><strong>Stop Push Button (Red Flush)</strong><br><small>Harmony XB4 22mm spring-return flush red button 1NC</small></td>
+                <td>Schneider Electric</td>
+                <td>XB4BA42</td>
+                <td>1</td>
+                <td>30.0 × 30.0 × 65.0</td>
+                <td>Door</td>
+                <td>0.0</td>
+            </tr>
+
+            <tr>
+                <td>16</td>
+                <td><span class="badge badge-control">Control</span></td>
+                <td><strong>LED Pilot Indicating Lamps 22.5mm (Set of 4: R-Y-B & Green Run)</strong><br><small>Harmony XB4 22mm LED pilot lamps for phase status and drive RUN indicator</small></td>
+                <td>Schneider Electric</td>
+                <td>XB4BVM3</td>
+                <td>4</td>
+                <td>30.0 × 30.0 × 54.0</td>
+                <td>Door</td>
+                <td>0.5</td>
+            </tr>
+
+            <tr>
+                <td>17</td>
+                <td><span class="badge badge-control">Control</span></td>
+                <td><strong>Analog Speed Setting Potentiometer 10k Ohm</strong><br><small>Harmony XB4 22mm complete monolithic linear cermet 10k potentiometer</small></td>
+                <td>Schneider Electric</td>
+                <td>XB4BD912R10K</td>
+                <td>1</td>
+                <td>30.0 × 30.0 × 60.0</td>
+                <td>Door</td>
+                <td>0.1</td>
+            </tr>
+
+            <tr>
+                <td>18</td>
+                <td><span class="badge badge-control">Control</span></td>
+                <td><strong>Control Terminal Block 2.5 sq mm</strong><br><small>DIN rail feed-through terminal blocks 800V 24A for digital/analog I/O</small></td>
+                <td>Connectwell</td>
+                <td>CTS2.5UN</td>
+                <td>16</td>
+                <td>6.0 × 45.0 × 43.0</td>
+                <td>DIN Rail</td>
+                <td>0.2</td>
+            </tr>
+
+            <tr>
+                <td>19</td>
+                <td><span class="badge badge-acc">Accessories</span></td>
+                <td><strong>Industrial Enclosure IP54 with Mounting Plate</strong><br><small>Sheet steel enclosure 800x1200x400 mm with zinc-plated internal mounting plate</small></td>
+                <td>Rittal</td>
+                <td>AX 1012.000</td>
+                <td>1</td>
+                <td>800.0 × 1200.0 × 400.0</td>
+                <td>Plate</td>
+                <td>0.0</td>
+            </tr>
+
+            <tr>
+                <td>20</td>
+                <td><span class="badge badge-acc">Accessories</span></td>
+                <td><strong>Exhaust Cooling Fan with Filter 230V AC</strong><br><small>Top/side mounted filter fan unit 230 m3/h air throughput</small></td>
+                <td>Rittal</td>
+                <td>SK 3239.100</td>
+                <td>1</td>
+                <td>204.0 × 204.0 × 90.0</td>
+                <td>Door</td>
+                <td>19.0</td>
+            </tr>
+
+            <tr>
+                <td>21</td>
+                <td><span class="badge badge-acc">Accessories</span></td>
+                <td><strong>Inlet Louver Filter Unit</strong><br><small>Bottom side inlet ventilation filter grille with IP54 pleated mat</small></td>
+                <td>Rittal</td>
+                <td>SK 3239.200</td>
+                <td>1</td>
+                <td>204.0 × 204.0 × 35.0</td>
+                <td>Door</td>
+                <td>0.0</td>
+            </tr>
+
+            <tr>
+                <td>22</td>
+                <td><span class="badge badge-acc">Accessories</span></td>
+                <td><strong>Panel Thermostat 0-60°C NO Contact</strong><br><small>DIN rail bimetallic thermostat for automatic fan triggering</small></td>
+                <td>Rittal</td>
+                <td>SK 3110.000</td>
+                <td>1</td>
+                <td>33.0 × 71.0 × 36.0</td>
+                <td>DIN Rail</td>
+                <td>0.0</td>
+            </tr>
+
+            <tr>
+                <td>23</td>
+                <td><span class="badge badge-acc">Wiring</span></td>
+                <td><strong>Power Cable 16 sq mm Tri-rated Copper Flexible</strong><br><small>16 sq mm PVC 600/1000V multi-strand power cable (Estimated 15m)</small></td>
+                <td>Generic</td>
+                <td>PART NUMBER NOT VERIFIED</td>
+                <td>15</td>
+                <td>0.0 × 0.0 × 0.0</td>
+                <td>External</td>
+                <td>0.0</td>
+            </tr>
+
+            <tr>
+                <td>24</td>
+                <td><span class="badge badge-acc">Wiring</span></td>
+                <td><strong>Control Cable 1.0 sq mm Flexible (Black / Red / Blue / Grey)</strong><br><small>1.0 sq mm multi-strand control wire for 24V DC and 230V AC (Estimated 40m)</small></td>
+                <td>Generic</td>
+                <td>PART NUMBER NOT VERIFIED</td>
+                <td>40</td>
+                <td>0.0 × 0.0 × 0.0</td>
+                <td>External</td>
+                <td>0.0</td>
+            </tr>
+
+            <tr>
+                <td>25</td>
+                <td><span class="badge badge-acc">Accessories</span></td>
+                <td><strong>Cable Gland Assortment Pack (M40, M32, M20, M16)</strong><br><small>Polyamide IP68 cable glands with locknuts for bottom gland plate entry</small></td>
+                <td>Generic</td>
+                <td>PART NUMBER NOT VERIFIED</td>
+                <td>1</td>
+                <td>0.0 × 0.0 × 0.0</td>
+                <td>Bottom</td>
+                <td>0.0</td>
+            </tr>
+
+        </tbody>
+    </table>
+
+    <h2>4. 3D Component Placements & Coordinates</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Instance ID</th>
+                <th>Component</th>
+                <th>Mounting</th>
+                <th>X (mm)</th>
+                <th>Y (mm)</th>
+                <th>Z (mm)</th>
+                <th>Width (mm)</th>
+                <th>Height (mm)</th>
+                <th>Depth (mm)</th>
+                <th>DIN Rail ID</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            <tr>
+                <td>inst_1_1</td>
+                <td>Variable Frequency Drive 18.5 kW</td>
+                <td>Plate</td>
+                <td>350.0</td>
+                <td>480.0</td>
+                <td>0.0</td>
+                <td>211.0</td>
+                <td>546.0</td>
+                <td>232.0</td>
+                <td>-</td>
+            </tr>
+
+            <tr>
+                <td>inst_2_1</td>
+                <td>Molded Case Circuit Breaker (MCCB) 63A 3P</td>
+                <td>Plate</td>
+                <td>80.0</td>
+                <td>865.0</td>
+                <td>0.0</td>
+                <td>105.0</td>
+                <td>161.0</td>
+                <td>86.0</td>
+                <td>-</td>
+            </tr>
+
+            <tr>
+                <td>inst_3_1</td>
+                <td>MCCB Extended Rotary Operating Handle</td>
+                <td>Door</td>
+                <td>400.0</td>
+                <td>968.0</td>
+                <td>545.0</td>
+                <td>75.0</td>
+                <td>75.0</td>
+                <td>50.0</td>
+                <td>-</td>
+            </tr>
+
+            <tr>
+                <td>inst_4_1</td>
+                <td>Input AC Line Reactor 3%</td>
+                <td>Plate</td>
+                <td>80.0</td>
+                <td>510.0</td>
+                <td>0.0</td>
+                <td>180.0</td>
+                <td>210.0</td>
+                <td>140.0</td>
+                <td>-</td>
+            </tr>
+
+            <tr>
+                <td>inst_5_1</td>
+                <td>Main Power Input Terminal Block 35 sq mm (Set of 3) #1</td>
+                <td>DIN Rail</td>
+                <td>100.0</td>
+                <td>70.0</td>
+                <td>7.5</td>
+                <td>16.0</td>
+                <td>58.0</td>
+                <td>54.0</td>
+                <td>din_rail_3</td>
+            </tr>
+
+            <tr>
+                <td>inst_5_2</td>
+                <td>Main Power Input Terminal Block 35 sq mm (Set of 3) #2</td>
+                <td>DIN Rail</td>
+                <td>118.0</td>
+                <td>70.0</td>
+                <td>7.5</td>
+                <td>16.0</td>
+                <td>58.0</td>
+                <td>54.0</td>
+                <td>din_rail_3</td>
+            </tr>
+
+            <tr>
+                <td>inst_5_3</td>
+                <td>Main Power Input Terminal Block 35 sq mm (Set of 3) #3</td>
+                <td>DIN Rail</td>
+                <td>136.0</td>
+                <td>70.0</td>
+                <td>7.5</td>
+                <td>16.0</td>
+                <td>58.0</td>
+                <td>54.0</td>
+                <td>din_rail_3</td>
+            </tr>
+
+            <tr>
+                <td>inst_6_1</td>
+                <td>Motor Output Terminal Block 35 sq mm (Set of 3) #1</td>
+                <td>DIN Rail</td>
+                <td>154.0</td>
+                <td>70.0</td>
+                <td>7.5</td>
+                <td>16.0</td>
+                <td>58.0</td>
+                <td>54.0</td>
+                <td>din_rail_3</td>
+            </tr>
+
+            <tr>
+                <td>inst_6_2</td>
+                <td>Motor Output Terminal Block 35 sq mm (Set of 3) #2</td>
+                <td>DIN Rail</td>
+                <td>172.0</td>
+                <td>70.0</td>
+                <td>7.5</td>
+                <td>16.0</td>
+                <td>58.0</td>
+                <td>54.0</td>
+                <td>din_rail_3</td>
+            </tr>
+
+            <tr>
+                <td>inst_6_3</td>
+                <td>Motor Output Terminal Block 35 sq mm (Set of 3) #3</td>
+                <td>DIN Rail</td>
+                <td>190.0</td>
+                <td>70.0</td>
+                <td>7.5</td>
+                <td>16.0</td>
+                <td>58.0</td>
+                <td>54.0</td>
+                <td>din_rail_3</td>
+            </tr>
+
+            <tr>
+                <td>inst_7_1</td>
+                <td>Earth (PE) Copper Busbar Bar 25x5mm</td>
+                <td>Plate</td>
+                <td>70.0</td>
+                <td>20.0</td>
+                <td>0.0</td>
+                <td>300.0</td>
+                <td>25.0</td>
+                <td>20.0</td>
+                <td>-</td>
+            </tr>
+
+            <tr>
+                <td>inst_8_1</td>
+                <td>Regulated Switch Mode Power Supply 24V DC 2.5A</td>
+                <td>DIN Rail</td>
+                <td>100.0</td>
+                <td>280.0</td>
+                <td>7.5</td>
+                <td>52.0</td>
+                <td>90.0</td>
+                <td>55.0</td>
+                <td>din_rail_1</td>
+            </tr>
+
+            <tr>
+                <td>inst_9_1</td>
+                <td>Control Circuit MCB 2-Pole 6A C-Curve</td>
+                <td>DIN Rail</td>
+                <td>154.0</td>
+                <td>280.0</td>
+                <td>7.5</td>
+                <td>36.0</td>
+                <td>85.0</td>
+                <td>78.0</td>
+                <td>din_rail_1</td>
+            </tr>
+
+            <tr>
+                <td>inst_10_1</td>
+                <td>DC Branch Circuit MCB 1-Pole 4A B-Curve</td>
+                <td>DIN Rail</td>
+                <td>192.0</td>
+                <td>280.0</td>
+                <td>7.5</td>
+                <td>18.0</td>
+                <td>85.0</td>
+                <td>78.0</td>
+                <td>din_rail_1</td>
+            </tr>
+
+            <tr>
+                <td>inst_11_1</td>
+                <td>Slim Interface Relay 24V DC 1CO with LED Base #1</td>
+                <td>DIN Rail</td>
+                <td>212.0</td>
+                <td>280.0</td>
+                <td>7.5</td>
+                <td>16.0</td>
+                <td>75.0</td>
+                <td>62.0</td>
+                <td>din_rail_1</td>
+            </tr>
+
+            <tr>
+                <td>inst_11_2</td>
+                <td>Slim Interface Relay 24V DC 1CO with LED Base #2</td>
+                <td>DIN Rail</td>
+                <td>230.0</td>
+                <td>280.0</td>
+                <td>7.5</td>
+                <td>16.0</td>
+                <td>75.0</td>
+                <td>62.0</td>
+                <td>din_rail_1</td>
+            </tr>
+
+            <tr>
+                <td>inst_11_3</td>
+                <td>Slim Interface Relay 24V DC 1CO with LED Base #3</td>
+                <td>DIN Rail</td>
+                <td>248.0</td>
+                <td>280.0</td>
+                <td>7.5</td>
+                <td>16.0</td>
+                <td>75.0</td>
+                <td>62.0</td>
+                <td>din_rail_1</td>
+            </tr>
+
+            <tr>
+                <td>inst_12_1</td>
+                <td>Emergency Stop Push Button (Mushroom Head 40mm)</td>
+                <td>Door</td>
+                <td>1040.0</td>
+                <td>1620.0</td>
+                <td>545.0</td>
+                <td>40.0</td>
+                <td>40.0</td>
+                <td>70.0</td>
+                <td>-</td>
+            </tr>
+
+            <tr>
+                <td>inst_13_1</td>
+                <td>Local-Off-Remote 3-Position Selector Switch</td>
+                <td>Door</td>
+                <td>460.0</td>
+                <td>968.0</td>
+                <td>545.0</td>
+                <td>30.0</td>
+                <td>30.0</td>
+                <td>65.0</td>
+                <td>-</td>
+            </tr>
+
+            <tr>
+                <td>inst_14_1</td>
+                <td>Start Push Button (Green Flush)</td>
+                <td>Door</td>
+                <td>520.0</td>
+                <td>968.0</td>
+                <td>545.0</td>
+                <td>30.0</td>
+                <td>30.0</td>
+                <td>65.0</td>
+                <td>-</td>
+            </tr>
+
+            <tr>
+                <td>inst_15_1</td>
+                <td>Stop Push Button (Red Flush)</td>
+                <td>Door</td>
+                <td>580.0</td>
+                <td>968.0</td>
+                <td>545.0</td>
+                <td>30.0</td>
+                <td>30.0</td>
+                <td>65.0</td>
+                <td>-</td>
+            </tr>
+
+            <tr>
+                <td>inst_16_1</td>
+                <td>LED Pilot Indicating Lamps 22.5mm (Set of 4: R-Y-B & Green Run) #1</td>
+                <td>Door</td>
+                <td>480.0</td>
+                <td>1620.0</td>
+                <td>545.0</td>
+                <td>30.0</td>
+                <td>30.0</td>
+                <td>54.0</td>
+                <td>-</td>
+            </tr>
+
+            <tr>
+                <td>inst_16_2</td>
+                <td>LED Pilot Indicating Lamps 22.5mm (Set of 4: R-Y-B & Green Run) #2</td>
+                <td>Door</td>
+                <td>530.0</td>
+                <td>1620.0</td>
+                <td>545.0</td>
+                <td>30.0</td>
+                <td>30.0</td>
+                <td>54.0</td>
+                <td>-</td>
+            </tr>
+
+            <tr>
+                <td>inst_16_3</td>
+                <td>LED Pilot Indicating Lamps 22.5mm (Set of 4: R-Y-B & Green Run) #3</td>
+                <td>Door</td>
+                <td>580.0</td>
+                <td>1620.0</td>
+                <td>545.0</td>
+                <td>30.0</td>
+                <td>30.0</td>
+                <td>54.0</td>
+                <td>-</td>
+            </tr>
+
+            <tr>
+                <td>inst_16_4</td>
+                <td>LED Pilot Indicating Lamps 22.5mm (Set of 4: R-Y-B & Green Run) #4</td>
+                <td>Door</td>
+                <td>630.0</td>
+                <td>1620.0</td>
+                <td>545.0</td>
+                <td>30.0</td>
+                <td>30.0</td>
+                <td>54.0</td>
+                <td>-</td>
+            </tr>
+
+            <tr>
+                <td>inst_17_1</td>
+                <td>Analog Speed Setting Potentiometer 10k Ohm</td>
+                <td>Door</td>
+                <td>640.0</td>
+                <td>968.0</td>
+                <td>545.0</td>
+                <td>30.0</td>
+                <td>30.0</td>
+                <td>60.0</td>
+                <td>-</td>
+            </tr>
+
+            <tr>
+                <td>inst_18_1</td>
+                <td>Control Terminal Block 2.5 sq mm #1</td>
+                <td>DIN Rail</td>
+                <td>100.0</td>
+                <td>170.0</td>
+                <td>7.5</td>
+                <td>6.0</td>
+                <td>45.0</td>
+                <td>43.0</td>
+                <td>din_rail_2</td>
+            </tr>
+
+            <tr>
+                <td>inst_18_2</td>
+                <td>Control Terminal Block 2.5 sq mm #2</td>
+                <td>DIN Rail</td>
+                <td>108.0</td>
+                <td>170.0</td>
+                <td>7.5</td>
+                <td>6.0</td>
+                <td>45.0</td>
+                <td>43.0</td>
+                <td>din_rail_2</td>
+            </tr>
+
+            <tr>
+                <td>inst_18_3</td>
+                <td>Control Terminal Block 2.5 sq mm #3</td>
+                <td>DIN Rail</td>
+                <td>116.0</td>
+                <td>170.0</td>
+                <td>7.5</td>
+                <td>6.0</td>
+                <td>45.0</td>
+                <td>43.0</td>
+                <td>din_rail_2</td>
+            </tr>
+
+            <tr>
+                <td>inst_18_4</td>
+                <td>Control Terminal Block 2.5 sq mm #4</td>
+                <td>DIN Rail</td>
+                <td>124.0</td>
+                <td>170.0</td>
+                <td>7.5</td>
+                <td>6.0</td>
+                <td>45.0</td>
+                <td>43.0</td>
+                <td>din_rail_2</td>
+            </tr>
+
+            <tr>
+                <td>inst_18_5</td>
+                <td>Control Terminal Block 2.5 sq mm #5</td>
+                <td>DIN Rail</td>
+                <td>132.0</td>
+                <td>170.0</td>
+                <td>7.5</td>
+                <td>6.0</td>
+                <td>45.0</td>
+                <td>43.0</td>
+                <td>din_rail_2</td>
+            </tr>
+
+            <tr>
+                <td>inst_18_6</td>
+                <td>Control Terminal Block 2.5 sq mm #6</td>
+                <td>DIN Rail</td>
+                <td>140.0</td>
+                <td>170.0</td>
+                <td>7.5</td>
+                <td>6.0</td>
+                <td>45.0</td>
+                <td>43.0</td>
+                <td>din_rail_2</td>
+            </tr>
+
+            <tr>
+                <td>inst_18_7</td>
+                <td>Control Terminal Block 2.5 sq mm #7</td>
+                <td>DIN Rail</td>
+                <td>148.0</td>
+                <td>170.0</td>
+                <td>7.5</td>
+                <td>6.0</td>
+                <td>45.0</td>
+                <td>43.0</td>
+                <td>din_rail_2</td>
+            </tr>
+
+            <tr>
+                <td>inst_18_8</td>
+                <td>Control Terminal Block 2.5 sq mm #8</td>
+                <td>DIN Rail</td>
+                <td>156.0</td>
+                <td>170.0</td>
+                <td>7.5</td>
+                <td>6.0</td>
+                <td>45.0</td>
+                <td>43.0</td>
+                <td>din_rail_2</td>
+            </tr>
+
+            <tr>
+                <td>inst_18_9</td>
+                <td>Control Terminal Block 2.5 sq mm #9</td>
+                <td>DIN Rail</td>
+                <td>164.0</td>
+                <td>170.0</td>
+                <td>7.5</td>
+                <td>6.0</td>
+                <td>45.0</td>
+                <td>43.0</td>
+                <td>din_rail_2</td>
+            </tr>
+
+            <tr>
+                <td>inst_18_10</td>
+                <td>Control Terminal Block 2.5 sq mm #10</td>
+                <td>DIN Rail</td>
+                <td>172.0</td>
+                <td>170.0</td>
+                <td>7.5</td>
+                <td>6.0</td>
+                <td>45.0</td>
+                <td>43.0</td>
+                <td>din_rail_2</td>
+            </tr>
+
+            <tr>
+                <td>inst_18_11</td>
+                <td>Control Terminal Block 2.5 sq mm #11</td>
+                <td>DIN Rail</td>
+                <td>180.0</td>
+                <td>170.0</td>
+                <td>7.5</td>
+                <td>6.0</td>
+                <td>45.0</td>
+                <td>43.0</td>
+                <td>din_rail_2</td>
+            </tr>
+
+            <tr>
+                <td>inst_18_12</td>
+                <td>Control Terminal Block 2.5 sq mm #12</td>
+                <td>DIN Rail</td>
+                <td>188.0</td>
+                <td>170.0</td>
+                <td>7.5</td>
+                <td>6.0</td>
+                <td>45.0</td>
+                <td>43.0</td>
+                <td>din_rail_2</td>
+            </tr>
+
+            <tr>
+                <td>inst_18_13</td>
+                <td>Control Terminal Block 2.5 sq mm #13</td>
+                <td>DIN Rail</td>
+                <td>196.0</td>
+                <td>170.0</td>
+                <td>7.5</td>
+                <td>6.0</td>
+                <td>45.0</td>
+                <td>43.0</td>
+                <td>din_rail_2</td>
+            </tr>
+
+            <tr>
+                <td>inst_18_14</td>
+                <td>Control Terminal Block 2.5 sq mm #14</td>
+                <td>DIN Rail</td>
+                <td>204.0</td>
+                <td>170.0</td>
+                <td>7.5</td>
+                <td>6.0</td>
+                <td>45.0</td>
+                <td>43.0</td>
+                <td>din_rail_2</td>
+            </tr>
+
+            <tr>
+                <td>inst_18_15</td>
+                <td>Control Terminal Block 2.5 sq mm #15</td>
+                <td>DIN Rail</td>
+                <td>212.0</td>
+                <td>170.0</td>
+                <td>7.5</td>
+                <td>6.0</td>
+                <td>45.0</td>
+                <td>43.0</td>
+                <td>din_rail_2</td>
+            </tr>
+
+            <tr>
+                <td>inst_18_16</td>
+                <td>Control Terminal Block 2.5 sq mm #16</td>
+                <td>DIN Rail</td>
+                <td>220.0</td>
+                <td>170.0</td>
+                <td>7.5</td>
+                <td>6.0</td>
+                <td>45.0</td>
+                <td>43.0</td>
+                <td>din_rail_2</td>
+            </tr>
+
+            <tr>
+                <td>inst_19_1</td>
+                <td>Industrial Enclosure IP54 with Mounting Plate</td>
+                <td>Plate</td>
+                <td>270.0</td>
+                <td>530.0</td>
+                <td>0.0</td>
+                <td>800.0</td>
+                <td>1200.0</td>
+                <td>400.0</td>
+                <td>-</td>
+            </tr>
+
+            <tr>
+                <td>inst_20_1</td>
+                <td>Exhaust Cooling Fan with Filter 230V AC</td>
+                <td>Door</td>
+                <td>40.0</td>
+                <td>80.0</td>
+                <td>545.0</td>
+                <td>204.0</td>
+                <td>204.0</td>
+                <td>90.0</td>
+                <td>-</td>
+            </tr>
+
+            <tr>
+                <td>inst_21_1</td>
+                <td>Inlet Louver Filter Unit</td>
+                <td>Door</td>
+                <td>700.0</td>
+                <td>968.0</td>
+                <td>545.0</td>
+                <td>204.0</td>
+                <td>204.0</td>
+                <td>35.0</td>
+                <td>-</td>
+            </tr>
+
+            <tr>
+                <td>inst_22_1</td>
+                <td>Panel Thermostat 0-60°C NO Contact</td>
+                <td>DIN Rail</td>
+                <td>266.0</td>
+                <td>280.0</td>
+                <td>7.5</td>
+                <td>33.0</td>
+                <td>71.0</td>
+                <td>36.0</td>
+                <td>din_rail_1</td>
+            </tr>
+
+        </tbody>
+    </table>
+
+    <h2>5. DIN Rails & Wiring Ducts</h2>
+    <div class="grid-2">
+        <div>
+            <h3>DIN Rails (DIN EN 60715 35mm)</h3>
+            <ul>
+                <li><strong>DIN Rail 1 (Modular Control Devices):</strong> Length 940 mm at Y=280 mm (Utilization: 19.9%)</li><li><strong>DIN Rail 2 (Control Field Terminals):</strong> Length 940 mm at Y=170 mm (Utilization: 10.2%)</li><li><strong>DIN Rail 3 (Power Terminals):</strong> Length 940 mm at Y=70 mm (Utilization: 10.2%)</li>
+            </ul>
+        </div>
+        <div>
+            <h3>Slotted Wiring Trunking / Ducts</h3>
+            <ul>
+                <li><strong>Main Left Vertical Duct (40x60):</strong> VERTICAL (40x60 mm) Length: 1620 mm</li><li><strong>Main Right Vertical Duct (40x60):</strong> VERTICAL (40x60 mm) Length: 1620 mm</li><li><strong>Horizontal Wire Duct 1 (40x60):</strong> HORIZONTAL (1020x40 mm) Length: 1020 mm</li><li><strong>Horizontal Wire Duct 2 (40x60):</strong> HORIZONTAL (1020x40 mm) Length: 1020 mm</li><li><strong>Horizontal Wire Duct 3 (40x60):</strong> HORIZONTAL (1020x40 mm) Length: 1020 mm</li>
+            </ul>
+        </div>
+    </div>
+
+    <h2>6. Thermal Balance & Dissipation</h2>
+    <div class="card">
+        <p><strong>Total Installed Heat Dissipation:</strong> 622.4 W</p>
+        <p><strong>Natural Enclosure Convection:</strong> 356.2 W</p>
+        <p><strong>Excess Thermal Load:</strong> 266.2 W</p>
+        <p><strong>Required Forced Airflow:</strong> 82.5 m³/h</p>
+        <p><strong>Cooling Recommendation:</strong> Standard Filter Fan (107 m³/h recommended with bottom inlet filter)</p>
+        <p><em>Notice: Detailed thermal CFD validation is required for high ambient industrial environments (>45°C).</em></p>
+    </div>
+
+    <div class="footer">
+        Generated by AI Electrical Panel Designer. Verified calculations compliant with IEC 61439 standards.
+    </div>
+</body>
+</html>
