@@ -132,9 +132,12 @@ class ARViewDialog(QDialog):
         # Quick Mobile Instructions
         inst_box = QLabel(
             "<b>Quick Steps:</b><br>"
-            "1. Connect your phone to the same Wi-Fi network as this PC.<br>"
-            "2. Point phone camera at QR code to open the web link.<br>"
-            "3. Tap <b>'View in AR (Actual Size)'</b> to project the panel onto your floor."
+            "1. Connect phone to the same Wi-Fi as this PC.<br>"
+            "2. Scan QR code to view the 3D model in phone browser.<br>"
+            "3. Tap <b>'View in AR (Actual Size)'</b>.<br>"
+            "<small style='color: #B45309;'>💡 <b>Android Note:</b> If the Google AR app closes immediately, Android is blocking local HTTP. "
+            "In Chrome on your phone, go to <b>chrome://flags</b>, enable <i>'unsafely-treat-insecure-origin-as-secure'</i>, "
+            "and add this URL to unlock in-browser camera AR!</small>"
         )
         inst_box.setStyleSheet("background-color: #FFFBEB; border: 1px solid #FDE68A; border-radius: 6px; padding: 8px 12px; font-size: 11px; color: #92400E; line-height: 1.4;")
         inst_box.setWordWrap(True)

@@ -490,7 +490,7 @@ def get_webar_html(metadata: Dict[str, Any], url: str) -> str:
             src="/model.glb"
             alt="Electrical Panel 3D Model"
             ar
-            ar-modes="scene-viewer webxr quick-look"
+            ar-modes="webxr scene-viewer quick-look"
             ar-scale="fixed"
             camera-controls
             touch-action="pan-y"
@@ -506,6 +506,27 @@ def get_webar_html(metadata: Dict[str, Any], url: str) -> str:
                 View in AR (Actual Size)
             </button>
         </model-viewer>
+    </div>
+
+    <div id="android-tip" style="background: #1e293b; border-top: 1px solid #334155; padding: 8px 14px; font-size: 11px; color: #94a3b8; display: flex; align-items: center; justify-content: space-between;">
+        <span>📱 <b>Android Tip:</b> If Scene Viewer closes, enable Chrome WebXR flag for direct camera AR.</span>
+        <button onclick="document.getElementById('help-modal').style.display='flex'" style="background: #0284c7; color: white; border: none; border-radius: 4px; padding: 3px 8px; font-size: 10px; font-weight: 700; cursor: pointer;">How-To</button>
+    </div>
+
+    <div id="help-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; padding: 20px; align-items: center; justify-content: center;" onclick="if(event.target===this)this.style.display='none'">
+        <div style="background: #1e293b; border: 1.5px solid #0284c7; border-radius: 12px; padding: 18px; max-width: 360px; color: #f1f5f9; font-size: 12px; line-height: 1.5;">
+            <div style="font-size: 14px; font-weight: 800; color: #38bdf8; margin-bottom: 8px;">Why does the Google AR app close?</div>
+            <p style="margin-bottom: 10px; color: #cbd5e1;">Android's native Google Scene Viewer blocks downloading 3D files over local Wi-Fi HTTP (<code style="color: #f59e0b;">http://192.168.x.x</code>) due to system security rules.</p>
+            <div style="font-weight: 700; color: #38bdf8; margin-bottom: 4px;">Quick 30-Sec Fix for Camera AR:</div>
+            <ol style="margin-left: 18px; margin-bottom: 12px; color: #e2e8f0;">
+                <li>Open a new Chrome tab and go to: <br><b style="color: #facc15;">chrome://flags</b></li>
+                <li>Search for: <b style="color: #facc15;">unsafely-treat-insecure-origin-as-secure</b></li>
+                <li>Set to <b>Enabled</b> and enter this URL: <br><code style="color: #38bdf8;">{url}</code></li>
+                <li>Tap <b>Relaunch</b> at the bottom.</li>
+            </ol>
+            <p style="color: #94a3b8; font-size: 11px; margin-bottom: 14px;">Once enabled, Chrome's in-browser camera AR (WebXR) will open your camera and place the panel without needing Scene Viewer!</p>
+            <button onclick="document.getElementById('help-modal').style.display='none'" style="width: 100%; background: #0284c7; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: 700; font-size: 12px; cursor: pointer;">Got it!</button>
+        </div>
     </div>
 
     <div class="info-panel">
