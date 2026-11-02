@@ -4,7 +4,7 @@
 [![GUI](https://img.shields.io/badge/GUI-PySide6%20(Qt%20for%20Python)-green.svg)](https://pypi.org/project/PySide6/)
 [![3D Engine](https://img.shields.io/badge/3D%20Engine-PyVista%20%7C%20VTK-orange.svg)](https://pyvista.org/)
 [![CAD Standards](https://img.shields.io/badge/Standard-IEC%2061439%20%7C%20IEC%2060529-yellow.svg)]()
-[![Tests](https://img.shields.io/badge/Tests-53%20Passed-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-55%20Passed-brightgreen.svg)]()
 
 **Electrical Panel Designer (EPD)** is a professional, deterministic engineering CAD and Bill of Materials (BOM) software application for industrial control panels, switchgear assemblies, and automation cabinets.
 
@@ -49,7 +49,16 @@ Designed for electrical switchboard manufacturers, panel builders, and automatio
 * Realistic sheet-metal textures: galvanized zinc mounting plate, semi-transparent enclosure frame, slotted wiring ducts, physical DIN EN 60715 rail profiles, and color-coded 3D electrical components.
 * Door toggle to inspect internal vs. outer door hardware arrangements.
 
-### 6. Comprehensive Manufacturing Deliverables
+### 6. Mobile Augmented Reality (AR) View (1:1 Physical Scale)
+* **True 1:1 Physical Scale**: Converts CAD millimeter dimensions to real-world meters ($0.001\times$) and anchors the panel model upright onto the physical floor or wall.
+* **Built-in Local Web Server**: Starts a lightweight background HTTP server on the local Wi-Fi network and displays the live access link directly below the "AR View" button.
+* **Instant QR Code Scanning**: Point any mobile camera (iPhone Camera or Android Google Lens / Chrome) at the screen to launch the 3D panel model without typing URLs.
+* **Native Mobile AR Support**:
+  * **Android**: Launches Google Scene Viewer directly into the phone's camera via Google Play Services for AR (ARCore).
+  * **iOS**: Launches Apple Quick Look / WebXR using ARKit.
+  * **Interactive Web 3D Preview**: 360° touch orbit inspection with realistic lighting, shadows, and dimension callouts.
+
+### 7. Comprehensive Manufacturing Deliverables
 * **2D CAD Drawing (`.dxf`)**: AutoCAD-compatible manufacturing layout with layer segregation (`PANEL_BORDER`, `MOUNTING_PLATE`, `DIN_RAILS`, `WIRE_DUCTS`, `COMPONENTS`, `TEXT_LABELS`), component crosshairs, cutouts, double door split lines, and standard engineering title block.
 * **3D Neutral CAD Model (`.step`)**: Standard ISO 10303-21 AP214 exchange format for SolidWorks, Autodesk Inventor, PTC Creo, and FreeCAD.
 * **Executive Engineering Report (`.html`)**: Self-contained report with thermal loss balance, air conditioning sizing, bill of materials, and manufacturer breakdown.

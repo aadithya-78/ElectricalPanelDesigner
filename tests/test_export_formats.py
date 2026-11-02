@@ -230,3 +230,66 @@ def test_double_door_enclosure_and_dxf(sample_project):
     assert "RIGHT DOOR LEAF" in dxf_content
 
 
+def test_ar_glb_generation_and_scale(sample_project):
+    """Test 1:1 real-world scale GLB export for mobile Augmented Reality."""
+    from app.export.ar_server import generate_panel_glb
+
+    glb_bytes, metadata = generate_panel_glb(
+        sample_project.enclosure,
+        sample_project.physical_instances,
+        sample_project.din_rails,
+        sample_project.wiring_ducts
+    )
+
+    # GLB starts with magic bytes b'glTF'
+    assert glb_bytes[:4] == b"glTF"
+    assert len(glb_bytes) > 2000
+    assert metadata["width_mm"] == 800.0
+    assert metadata["height_mm"] == 1200.0
+    assert metadata["depth_mm"] == 400.0
+    assert metadata["component_count"] >= 1
+
+
+def test_ar_server_lifecycle_and_endpoints(sample_project):
+    """Test background AR HTTP server lifecycle and endpoints: /, /model.glb, /qr, /status."""
+    import urllib.request
+    from app.export.ar_server import get_ar_server
+
+    srv = get_ar_server()
+    url = srv.start()
+    assert url.startswith("http://")
+    assert srv.is_running is True
+
+    try:
+        srv.update_model(
+            sample_project.enclosure,
+            sample_project.physical_instances,
+            sample_project.din_rails,
+            sample_project.wiring_ducts
+        )
+
+        # 1. HTML WebAR root
+        html_resp = urllib.request.urlopen(f"{url}/").read().decode("utf-8")
+        assert "<model-viewer" in html_resp
+        assert "ar-scale=\"fixed\"" in html_resp
+        assert "Electrical Panel AR" in html_resp
+
+        # 2. Binary GLB model
+        glb_resp = urllib.request.urlopen(f"{url}/model.glb").read()
+        assert glb_resp[:4] == b"glTF"
+        assert len(glb_resp) == len(srv.glb_data)
+
+        # 3. QR code PNG
+        qr_resp = urllib.request.urlopen(f"{url}/qr").read()
+        assert qr_resp[:4] == b"\x89PNG"
+
+        # 4. Status metadata
+        status_resp = urllib.request.urlopen(f"{url}/status").read().decode("utf-8")
+        assert "width_mm" in status_resp
+        assert "800" in status_resp
+    finally:
+        srv.stop()
+        assert srv.is_running is False
+
+
+
