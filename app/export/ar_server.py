@@ -350,7 +350,7 @@ def get_webar_html(metadata: Dict[str, Any], url: str) -> str:
         .viewer-container {{
             flex: 1;
             position: relative;
-            background: radial-gradient(circle at 50% 40%, #1e2c38 0%, #0d151c 100%);
+            background: #111C24;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -371,6 +371,7 @@ def get_webar_html(metadata: Dict[str, Any], url: str) -> str:
             outline: none;
             position: relative;
             z-index: 2;
+            --poster-color: transparent;
         }}
 
         /* On-Screen Amazon-Style AR HUD Overlay */
@@ -624,22 +625,25 @@ def get_webar_html(metadata: Dict[str, Any], url: str) -> str:
 
         <!-- Floating Action Dock -->
         <div id="action-dock" class="action-dock">
-            <!-- 3-Step Visual Guide -->
-            <div class="guide-steps" style="border: 1.5px solid #FF9A4E; padding: 10px 14px; text-align: center; flex-direction: column; gap: 4px;">
-                <div style="font-size: 13px; font-weight: 800; color: #FF9A4E;">👉 TAP THE FLOOR ON YOUR SCREEN TO DROP PANEL</div>
-                <div style="font-size: 11px; color: #CBD5E1;">Aim camera down at floor texture (carpet/tiles), move phone, then <b>tap screen</b>!</div>
+            <button id="btn-camera-toggle" class="btn-primary-ar" onclick="toggleCameraOverlay()">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111C24" stroke-width="2.3"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                <span id="cam-btn-text">📷 Open Live Room Camera (Instant AR)</span>
+            </button>
+
+            <!-- Optional WebXR button -->
+            <button id="main-ar-trigger" class="btn-camera-live" onclick="launchAR()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+                <span>Floor Surface Tracking (WebXR)</span>
+            </button>
+        </div>
+
+        <!-- Floating Camera HUD Notification -->
+        <div id="camera-hud" style="display: none; position: absolute; top: 16px; left: 16px; right: 16px; background: rgba(17, 28, 36, 0.92); border: 1.5px solid #38BDF8; border-radius: 12px; padding: 10px 14px; z-index: 35; align-items: center; justify-content: space-between; font-size: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.6);">
+            <div>
+                <b style="color: #38BDF8;">📷 Room Camera Active!</b>
+                <div style="color: #CBD5E1; font-size: 11px;">Drag panel with 1 finger • Use 2 fingers to rotate & zoom</div>
             </div>
-
-            <button id="main-ar-trigger" class="btn-primary-ar" onclick="launchAR()">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111C24" stroke-width="2.4"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                View in AR (Actual Size)
-            </button>
-
-            <!-- Instant Live Camera Pass-Through Mode (Guaranteed fallback) -->
-            <button id="btn-camera-toggle" class="btn-camera-live" onclick="toggleCameraOverlay()">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-                <span id="cam-btn-text">📷 Turn On Room Camera View</span>
-            </button>
+            <button onclick="resetModelView()" style="background: #0284C7; color: white; border: none; padding: 5px 10px; border-radius: 6px; font-weight: 700; font-size: 11px;">Reset View</button>
         </div>
     </div>
 
@@ -654,12 +658,12 @@ def get_webar_html(metadata: Dict[str, Any], url: str) -> str:
         const hudScanning = document.getElementById('hud-scanning');
         const hudReticle = document.getElementById('hud-reticle');
         const hudPlaced = document.getElementById('hud-placed');
+        const cameraHud = document.getElementById('camera-hud');
         const actionDock = document.getElementById('action-dock');
         const video = document.getElementById('camera-video');
         let cameraActive = false;
         let camStream = null;
 
-        // WebXR Status Listener
         viewer.addEventListener('ar-status', (event) => {{
             const status = event.detail.status;
             if (status === 'session-started') {{
@@ -673,13 +677,9 @@ def get_webar_html(metadata: Dict[str, Any], url: str) -> str:
                 hudReticle.style.display = 'none';
                 hudPlaced.style.display = 'flex';
                 setTimeout(() => {{ hudPlaced.style.display = 'none'; }}, 4000);
-            }} else if (status === 'not-presenting') {{
+            }} else if (status === 'not-presenting' || status === 'failed') {{
                 hud.style.display = 'none';
                 actionDock.style.display = 'flex';
-            }} else if (status === 'failed') {{
-                hud.style.display = 'none';
-                actionDock.style.display = 'flex';
-                toggleCameraOverlay(); // Automatic graceful fallback to Camera View!
             }}
         }});
 
@@ -691,6 +691,11 @@ def get_webar_html(metadata: Dict[str, Any], url: str) -> str:
             }}
         }}
 
+        function resetModelView() {{
+            viewer.cameraOrbit = '0deg 75deg 105%';
+            viewer.resetTurntableRotation();
+        }}
+
         async function toggleCameraOverlay() {{
             if (!cameraActive) {{
                 try {{
@@ -699,22 +704,25 @@ def get_webar_html(metadata: Dict[str, Any], url: str) -> str:
                     }});
                     video.srcObject = camStream;
                     video.style.display = 'block';
+                    await video.play();
+                    document.querySelector('.viewer-container').style.background = 'transparent';
                     viewer.style.background = 'transparent';
                     cameraActive = true;
-                    document.getElementById('cam-btn-text').innerText = '✕ Turn Off Room Camera View';
-                    document.getElementById('main-ar-trigger').style.display = 'none';
+                    document.getElementById('cam-btn-text').innerText = '✕ Close Room Camera View';
+                    cameraHud.style.display = 'flex';
                 }} catch (err) {{
-                    alert('Camera access needed to show panel in your room. Please allow camera permissions in browser settings.');
+                    alert('Camera access error: ' + err.message + '\\nPlease ensure camera permission is granted in browser.');
                 }}
             }} else {{
                 if (camStream) {{
                     camStream.getTracks().forEach(t => t.stop());
                 }}
                 video.style.display = 'none';
+                document.querySelector('.viewer-container').style.background = '#111C24';
                 viewer.style.background = '';
                 cameraActive = false;
-                document.getElementById('cam-btn-text').innerText = '📷 Turn On Room Camera View';
-                document.getElementById('main-ar-trigger').style.display = 'flex';
+                document.getElementById('cam-btn-text').innerText = '📷 Open Live Room Camera (Instant AR)';
+                cameraHud.style.display = 'none';
             }}
         }}
     </script>
