@@ -625,10 +625,9 @@ def get_webar_html(metadata: Dict[str, Any], url: str) -> str:
         <!-- Floating Action Dock -->
         <div id="action-dock" class="action-dock">
             <!-- 3-Step Visual Guide -->
-            <div class="guide-steps">
-                <div class="step-item"><span class="step-num">1</span> Aim Floor</div>
-                <div class="step-item"><span class="step-num">2</span> Move Phone</div>
-                <div class="step-item"><span class="step-num">3</span> Tap Screen</div>
+            <div class="guide-steps" style="border: 1.5px solid #FF9A4E; padding: 10px 14px; text-align: center; flex-direction: column; gap: 4px;">
+                <div style="font-size: 13px; font-weight: 800; color: #FF9A4E;">👉 TAP THE FLOOR ON YOUR SCREEN TO DROP PANEL</div>
+                <div style="font-size: 11px; color: #CBD5E1;">Aim camera down at floor texture (carpet/tiles), move phone, then <b>tap screen</b>!</div>
             </div>
 
             <button id="main-ar-trigger" class="btn-primary-ar" onclick="launchAR()">
@@ -739,6 +738,9 @@ class ARRequestHandler(http.server.BaseHTTPRequestHandler):
             self.send_header("Content-Type", "text/html; charset=utf-8")
             self.send_header("Content-Length", str(len(body)))
             self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
+            self.send_header("Pragma", "no-cache")
+            self.send_header("Expires", "0")
             self.end_headers()
             self.wfile.write(body)
 
