@@ -1,12 +1,16 @@
 # -*- mode: python ; coding: utf-8 -*-
+from PyInstaller.utils.hooks import copy_metadata
+
+datas = [('catalogs', 'catalogs'), ('app/resources', 'app/resources'), ('app/database/component_library.db', 'app/database')]
+datas += copy_metadata('pyvista')
 
 
 a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[('catalogs', 'catalogs'), ('app/resources', 'app/resources'), ('app/database/component_library.db', 'app/database')],
-    hiddenimports=[],
+    datas=datas,
+    hiddenimports=['qrcode', 'qrcode.image.pil'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
